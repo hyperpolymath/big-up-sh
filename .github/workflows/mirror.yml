@@ -1,4 +1,8 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Hub-and-spoke mirror workflow: Mirrors this repository to GitLab, Codeberg, and Bitbucket.
+# NOTE: Uses --force push intentionally to maintain exact mirror state across all remotes.
+#
 name: Mirror to GitLab/Codeberg/Bitbucket
 
 on:
@@ -8,6 +12,10 @@ on:
 
 permissions: read-all
 
+env:
+  # Safely extract repository name once for all jobs
+  REPO_NAME: ${{ github.event.repository.name }}
+
 jobs:
   mirror-gitlab:
     runs-on: ubuntu-latest
@@ -16,12 +24,17 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           fetch-depth: 0
+      - name: Add GitLab host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -t ed25519,rsa gitlab.com >> ~/.ssh/known_hosts
       - uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
         with:
           ssh-private-key: ${{ secrets.GITLAB_SSH_KEY }}
       - name: Mirror to GitLab
         run: |
-          git remote add gitlab git@gitlab.com:hyperpolymath/${GITHUB_REPOSITORY#*/}.git || true
+          set -euo pipefail
+          git remote add gitlab "git@gitlab.com:hyperpolymath/${REPO_NAME}.git" 2>/dev/null || git remote set-url gitlab "git@gitlab.com:hyperpolymath/${REPO_NAME}.git"
           git push gitlab --all --force
           git push gitlab --tags --force
 
@@ -32,12 +45,17 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           fetch-depth: 0
+      - name: Add Codeberg host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -t ed25519,rsa codeberg.org >> ~/.ssh/known_hosts
       - uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
         with:
           ssh-private-key: ${{ secrets.CODEBERG_SSH_KEY }}
       - name: Mirror to Codeberg
         run: |
-          git remote add codeberg git@codeberg.org:hyperpolymath/${GITHUB_REPOSITORY#*/}.git || true
+          set -euo pipefail
+          git remote add codeberg "git@codeberg.org:hyperpolymath/${REPO_NAME}.git" 2>/dev/null || git remote set-url codeberg "git@codeberg.org:hyperpolymath/${REPO_NAME}.git"
           git push codeberg --all --force
           git push codeberg --tags --force
 
@@ -48,11 +66,16 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           fetch-depth: 0
+      - name: Add Bitbucket host key
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -t ed25519,rsa bitbucket.org >> ~/.ssh/known_hosts
       - uses: webfactory/ssh-agent@dc588b651fe13675774614f8e6a936a468676387 # v0.9.0
         with:
           ssh-private-key: ${{ secrets.BITBUCKET_SSH_KEY }}
       - name: Mirror to Bitbucket
         run: |
-          git remote add bitbucket git@bitbucket.org:hyperpolymath/${GITHUB_REPOSITORY#*/}.git || true
+          set -euo pipefail
+          git remote add bitbucket "git@bitbucket.org:hyperpolymath/${REPO_NAME}.git" 2>/dev/null || git remote set-url bitbucket "git@bitbucket.org:hyperpolymath/${REPO_NAME}.git"
           git push bitbucket --all --force
           git push bitbucket --tags --force
