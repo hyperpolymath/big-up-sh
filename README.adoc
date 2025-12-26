@@ -1,0 +1,99 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+= big-up.sh
+:toc: macro
+:toclevels: 3
+:icons: font
+:source-highlighter: rouge
+
+A comprehensive system management and hardening tool.
+
+[IMPORTANT]
+====
+*Project Status: Specification Pending*
+
+This repository currently contains infrastructure configuration and governance policies only.
+Implementation code and detailed specifications will be uploaded shortly.
+====
+
+toc::[]
+
+== Overview
+
+`big-up.sh` is designed to be a comprehensive system management and hardening tool providing:
+
+* *Health Checks* — System health monitoring and diagnostics
+* *Multi-stage System Updates* — Staged, rollback-capable system upgrades
+* *Security Hardening* — Automated security configuration and compliance
+* *Remote Management via PSSH* — Parallel SSH operations across fleet
+
+== Current Repository Contents
+
+[cols="2,3,1"]
+|===
+|Component |Description |Status
+
+|`.github/workflows/mirror.yml`
+|Hub-and-spoke multi-forge mirroring (GitLab, Codeberg, Bitbucket)
+|✓ Active
+
+|`.github/workflows/instant-sync.yml`
+|Automatic forge propagation on push/release
+|✓ Active
+
+|`.claude/CLAUDE.md`
+|Hyperpolymath Standard — technology governance policy
+|✓ Active
+
+|Source implementation
+|Core functionality
+|⏳ Pending
+
+|Specification documents
+|Detailed design and architecture
+|⏳ Pending
+|===
+
+== Technology Governance
+
+This project adheres to the *Hyperpolymath Standard* for technology selection.
+
+=== Preferred Stack
+
+[horizontal]
+Systems/CLI:: Rust
+Application Code:: ReScript (compiles to JS)
+Runtime:: Deno (replaces Node.js/npm)
+Backend Services:: Gleam (BEAM or JS target)
+Mobile:: Tauri 2.0+ / Dioxus (Rust-first, no Kotlin/Swift)
+Configuration:: Nickel
+State/Meta:: Guile Scheme
+
+=== Security Requirements
+
+* SHA-256+ for all cryptographic operations (no MD5/SHA1)
+* HTTPS only — no plain HTTP
+* No hardcoded secrets
+* SHA-pinned dependencies
+* SPDX license headers on all files
+
+See link:.claude/CLAUDE.md[CLAUDE.md] for complete policy.
+
+== Multi-Forge Distribution
+
+This repository is automatically mirrored to:
+
+* https://gitlab.com/hyperpolymath/big-up-sh[GitLab]
+* https://codeberg.org/hyperpolymath/big-up-sh[Codeberg]
+* https://bitbucket.org/hyperpolymath/big-up-sh[Bitbucket]
+
+Mirrors are force-pushed to maintain exact state across all forges.
+
+== License
+
+AGPL-3.0-or-later
+
+== Roadmap
+
+See link:ROADMAP.adoc[ROADMAP.adoc] for development phases and milestones.

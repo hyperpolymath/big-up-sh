@@ -1,0 +1,142 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
+
+= big-up.sh Roadmap
+:toc: macro
+:toclevels: 2
+:icons: font
+
+Development roadmap for the big-up.sh system management and hardening tool.
+
+toc::[]
+
+== Current State
+
+[cols="1,3"]
+|===
+|Phase |Infrastructure Setup
+
+|Status
+|✓ Complete
+
+|Deliverables
+a|
+* Multi-forge mirroring (GitHub → GitLab, Codeberg, Bitbucket)
+* Instant-sync automation on push/release
+* Technology governance policy (Hyperpolymath Standard)
+* Repository structure
+|===
+
+== Phase 1: Specification & Design
+
+[cols="1,3"]
+|===
+|Status |⏳ Pending — specifications will be uploaded shortly
+
+|Deliverables
+a|
+* [ ] Detailed feature specifications
+* [ ] Architecture design documents
+* [ ] API/CLI interface definitions
+* [ ] Security model documentation
+* [ ] STATE.scm / META.scm / ECOSYSTEM.scm files
+|===
+
+== Phase 2: Core Implementation
+
+[cols="1,3"]
+|===
+|Status |🔲 Not Started
+
+|Planned Features
+a|
+* [ ] *Health Checks Module*
+** System resource monitoring
+** Service status verification
+** Disk/memory/CPU diagnostics
+** Network connectivity checks
+
+* [ ] *Multi-stage System Updates*
+** Pre-update system snapshots
+** Staged rollout with checkpoints
+** Automatic rollback on failure
+** Update verification and testing
+
+* [ ] *Security Hardening*
+** Firewall configuration automation
+** SSH hardening
+** User/permission auditing
+** Compliance scanning (CIS benchmarks)
+
+* [ ] *Remote Management (PSSH)*
+** Parallel command execution
+** Fleet inventory management
+** Credential management (secure)
+** Output aggregation and reporting
+|===
+
+== Phase 3: Integration & Packaging
+
+[cols="1,3"]
+|===
+|Status |🔲 Not Started
+
+|Deliverables
+a|
+* [ ] Guix package definition (guix.scm)
+* [ ] Nix flake (flake.nix) as fallback
+* [ ] Container images (if applicable)
+* [ ] Integration tests
+* [ ] Documentation site
+|===
+
+== Phase 4: Release & Distribution
+
+[cols="1,3"]
+|===
+|Status |🔲 Not Started
+
+|Deliverables
+a|
+* [ ] v0.1.0 initial release
+* [ ] Release automation via instant-sync
+* [ ] Changelog automation
+* [ ] User documentation
+|===
+
+== Technology Decisions
+
+[NOTE]
+====
+The original README.md references D language implementation (`dub build`).
+The Hyperpolymath Standard in CLAUDE.md strongly favors Rust for CLI/systems work.
+
+*Decision pending* — final implementation language to be confirmed in Phase 1 specifications.
+====
+
+=== Candidate Approaches
+
+[cols="1,2,2"]
+|===
+|Option |Pros |Cons
+
+|*Rust*
+|Aligns with Hyperpolymath Standard; excellent systems tooling; memory safety
+|Steeper learning curve; longer compile times
+
+|*D*
+|Fast development; good systems programming; existing README reference
+|Not in Hyperpolymath "preferred" list; smaller ecosystem
+
+|*Hybrid*
+|Core in Rust, scripting glue in ReScript/Gleam
+|Added complexity; multiple build systems
+|===
+
+== Contributing
+
+Contributions welcome once specifications are published. All contributions must:
+
+* Follow the Hyperpolymath Standard (see `.claude/CLAUDE.md`)
+* Include SPDX license headers
+* Pass security requirements (no MD5/SHA1, HTTPS only, no secrets)
