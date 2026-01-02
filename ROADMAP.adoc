@@ -1,142 +1,104 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
-// SPDX-FileCopyrightText: 2025 Jonathan D.A. Jewell <hyperpolymath>
-
-= big-up.sh Roadmap
-:toc: macro
-:toclevels: 2
+= Operating Room (formerly big-up)
+image:https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]
+image:https://img.shields.io/badge/License-Palimpsest-6a5acd.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
+:toc:
+:toclevels: 3
 :icons: font
+:source-highlighter: rouge
 
-Development roadmap for the big-up.sh system management and hardening tool.
+A **plan-first** system management and hardening tool — designed as a free/open alternative to “optimizer” utilities that nag, exaggerate, or sell fear.
 
-toc::[]
-
-== Current State
-
-[cols="1,3"]
-|===
-|Phase |Infrastructure Setup
-
-|Status
-|✓ Complete
-
-|Deliverables
-a|
-* Multi-forge mirroring (GitHub → GitLab, Codeberg, Bitbucket)
-* Instant-sync automation on push/release
-* Technology governance policy (Hyperpolymath Standard)
-* Repository structure
-|===
-
-== Phase 1: Specification & Design
-
-[cols="1,3"]
-|===
-|Status |⏳ Pending — specifications will be uploaded shortly
-
-|Deliverables
-a|
-* [ ] Detailed feature specifications
-* [ ] Architecture design documents
-* [ ] API/CLI interface definitions
-* [ ] Security model documentation
-* [ ] STATE.scm / META.scm / ECOSYSTEM.scm files
-|===
-
-== Phase 2: Core Implementation
-
-[cols="1,3"]
-|===
-|Status |🔲 Not Started
-
-|Planned Features
-a|
-* [ ] *Health Checks Module*
-** System resource monitoring
-** Service status verification
-** Disk/memory/CPU diagnostics
-** Network connectivity checks
-
-* [ ] *Multi-stage System Updates*
-** Pre-update system snapshots
-** Staged rollout with checkpoints
-** Automatic rollback on failure
-** Update verification and testing
-
-* [ ] *Security Hardening*
-** Firewall configuration automation
-** SSH hardening
-** User/permission auditing
-** Compliance scanning (CIS benchmarks)
-
-* [ ] *Remote Management (PSSH)*
-** Parallel command execution
-** Fleet inventory management
-** Credential management (secure)
-** Output aggregation and reporting
-|===
-
-== Phase 3: Integration & Packaging
-
-[cols="1,3"]
-|===
-|Status |🔲 Not Started
-
-|Deliverables
-a|
-* [ ] Guix package definition (guix.scm)
-* [ ] Nix flake (flake.nix) as fallback
-* [ ] Container images (if applicable)
-* [ ] Integration tests
-* [ ] Documentation site
-|===
-
-== Phase 4: Release & Distribution
-
-[cols="1,3"]
-|===
-|Status |🔲 Not Started
-
-|Deliverables
-a|
-* [ ] v0.1.0 initial release
-* [ ] Release automation via instant-sync
-* [ ] Changelog automation
-* [ ] User documentation
-|===
-
-== Technology Decisions
-
-[NOTE]
+[IMPORTANT]
 ====
-The original README.md references D language implementation (`dub build`).
-The Hyperpolymath Standard in CLAUDE.md strongly favors Rust for CLI/systems work.
+*Project status:* *Specification Pending*
 
-*Decision pending* — final implementation language to be confirmed in Phase 1 specifications.
+This repository currently contains infrastructure configuration and governance/policy only.
+Implementation code and the detailed specifications will land next.
 ====
 
-=== Candidate Approaches
+== What it is
 
-[cols="1,2,2"]
+Operating Room is the part of the AmbientOps ecosystem responsible for **making changes safely**:
+
+* **Scan**: collect evidence (no changes)
+* **Plan**: propose reversible steps with previews
+* **Apply**: execute only an approved plan
+* **Undo**: roll back where possible
+* **Receipt**: produce an auditable report of what was checked/changed
+
+It is explicitly *anti-fearware*:
+
+* No fake “error counts”
+* No “registry cleaning for performance”
+* No dark patterns, countdowns, or scare copy
+* No silent downloads of third-party binaries
+
+== Design goals
+
+* **Trustworthy**: show evidence, not hype
+* **Reversible-first**: prefer actions that can be undone
+* **Least privilege**: elevation only when strictly necessary
+* **Modular**: features ship as packs/adapters, not a monolith
+* **Cross-platform**: core UI + OS-specific packs
+
+== Planned modules
+
+* **Health checks** (non-mutating diagnostics)
+* **Security hardening** (guided, reversible where possible)
+* **Staged updates** (checkpoints + rollback strategy)
+* **Receipts & undo** (always-on audit trail)
+* **Packs & adapters** (OS packs + optional connectors)
+
+Remote / fleet capabilities may exist later, but the primary focus is the **everyday single-machine user**.
+
+== Implementation approach (language)
+
+Operating Room will be **D-first**, with **Rust for safety-critical components**.
+
+* **D**: orchestration, core CLI, plan engine, pack runtime, high-velocity implementation
+* **Rust (optional/targeted)**: privileged helpers, sandboxed runners, high-assurance execution paths
+
+This keeps the project aligned with “do real work” ergonomics while still giving us a place to put the most sensitive code paths.
+
+== Repository contents (current)
+
+[cols="1,3,1",options="header"]
 |===
-|Option |Pros |Cons
+| Component | Description | Status
 
-|*Rust*
-|Aligns with Hyperpolymath Standard; excellent systems tooling; memory safety
-|Steeper learning curve; longer compile times
+| `.github/workflows/mirror.yml`
+| Hub-and-spoke multi-forge mirroring (GitLab, Codeberg, Bitbucket)
+| ✓ Active
 
-|*D*
-|Fast development; good systems programming; existing README reference
-|Not in Hyperpolymath "preferred" list; smaller ecosystem
+| `.github/workflows/instant-sync.yml`
+| Automatic forge propagation on push/release
+| ✓ Active
 
-|*Hybrid*
-|Core in Rust, scripting glue in ReScript/Gleam
-|Added complexity; multiple build systems
+| `.claude/CLAUDE.md`
+| Technology governance policy
+| ✓ Active
+
+| Implementation code
+| Core functionality
+| ⏳ Pending
+
+| Specifications
+| Detailed design and architecture
+| ⏳ Pending
 |===
 
-== Contributing
+== Security requirements (baseline)
 
-Contributions welcome once specifications are published. All contributions must:
+* No MD5/SHA1
+* HTTPS only
+* No hardcoded secrets
+* Dependencies must be pinned/locked
+* Every change must produce a receipt (scan and apply)
 
-* Follow the Hyperpolymath Standard (see `.claude/CLAUDE.md`)
-* Include SPDX license headers
-* Pass security requirements (no MD5/SHA1, HTTPS only, no secrets)
+== License
+
+AGPL-3.0-or-later (plus Palimpsest where indicated).
+
+== Roadmap
+
+See `ROADMAP.adoc`.
