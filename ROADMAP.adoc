@@ -1,104 +1,126 @@
-= Operating Room (formerly big-up)
-image:https://img.shields.io/badge/License-AGPL--3.0--or--later-blue.svg[AGPL-3.0,link="https://www.gnu.org/licenses/agpl-3.0"]
-image:https://img.shields.io/badge/License-Palimpsest-6a5acd.svg[Palimpsest,link="https://github.com/hyperpolymath/palimpsest-licence"]
+= Operating Room Roadmap
 :toc:
 :toclevels: 3
 :icons: font
-:source-highlighter: rouge
 
-A **plan-first** system management and hardening tool — designed as a free/open alternative to “optimizer” utilities that nag, exaggerate, or sell fear.
+Development roadmap for Operating Room (formerly big-up): the plan-first “doer” in the AmbientOps ecosystem.
 
-[IMPORTANT]
-====
-*Project status:* *Specification Pending*
+== Current state
 
-This repository currently contains infrastructure configuration and governance/policy only.
-Implementation code and the detailed specifications will land next.
-====
-
-== What it is
-
-Operating Room is the part of the AmbientOps ecosystem responsible for **making changes safely**:
-
-* **Scan**: collect evidence (no changes)
-* **Plan**: propose reversible steps with previews
-* **Apply**: execute only an approved plan
-* **Undo**: roll back where possible
-* **Receipt**: produce an auditable report of what was checked/changed
-
-It is explicitly *anti-fearware*:
-
-* No fake “error counts”
-* No “registry cleaning for performance”
-* No dark patterns, countdowns, or scare copy
-* No silent downloads of third-party binaries
-
-== Design goals
-
-* **Trustworthy**: show evidence, not hype
-* **Reversible-first**: prefer actions that can be undone
-* **Least privilege**: elevation only when strictly necessary
-* **Modular**: features ship as packs/adapters, not a monolith
-* **Cross-platform**: core UI + OS-specific packs
-
-== Planned modules
-
-* **Health checks** (non-mutating diagnostics)
-* **Security hardening** (guided, reversible where possible)
-* **Staged updates** (checkpoints + rollback strategy)
-* **Receipts & undo** (always-on audit trail)
-* **Packs & adapters** (OS packs + optional connectors)
-
-Remote / fleet capabilities may exist later, but the primary focus is the **everyday single-machine user**.
-
-== Implementation approach (language)
-
-Operating Room will be **D-first**, with **Rust for safety-critical components**.
-
-* **D**: orchestration, core CLI, plan engine, pack runtime, high-velocity implementation
-* **Rust (optional/targeted)**: privileged helpers, sandboxed runners, high-assurance execution paths
-
-This keeps the project aligned with “do real work” ergonomics while still giving us a place to put the most sensitive code paths.
-
-== Repository contents (current)
-
-[cols="1,3,1",options="header"]
+[cols="1,2,1",options="header"]
 |===
-| Component | Description | Status
+| Phase | Focus | Status
 
-| `.github/workflows/mirror.yml`
-| Hub-and-spoke multi-forge mirroring (GitLab, Codeberg, Bitbucket)
-| ✓ Active
+| Phase 0
+| Infrastructure + governance
+| ✓ Complete
 
-| `.github/workflows/instant-sync.yml`
-| Automatic forge propagation on push/release
-| ✓ Active
-
-| `.claude/CLAUDE.md`
-| Technology governance policy
-| ✓ Active
-
-| Implementation code
-| Core functionality
+| Phase 1
+| Specifications + contracts
 | ⏳ Pending
 
-| Specifications
-| Detailed design and architecture
-| ⏳ Pending
+| Phase 2
+| MVP implementation (Scan→Plan→Apply→Undo→Receipt)
+| 🔲 Not Started
+
+| Phase 3
+| Packs/adapters + integrations + packaging
+| 🔲 Not Started
+
+| Phase 4
+| Release + distribution
+| 🔲 Not Started
 |===
 
-== Security requirements (baseline)
+== Phase 0: Infrastructure (complete)
 
-* No MD5/SHA1
-* HTTPS only
-* No hardcoded secrets
-* Dependencies must be pinned/locked
-* Every change must produce a receipt (scan and apply)
+Deliverables:
 
-== License
+* Multi-forge mirroring (GitHub → GitLab, Codeberg, Bitbucket)
+* Instant-sync automation on push/release
+* Governance policy in `.claude/CLAUDE.md`
+* Initial repo structure
 
-AGPL-3.0-or-later (plus Palimpsest where indicated).
+== Phase 1: Specifications & contracts (pending)
 
-== Roadmap
+Deliverables:
 
-See `ROADMAP.adoc`.
+* Feature specifications (what we do / do not do)
+* CLI interface definitions (verbs + stable flags)
+* Security model (least privilege, logging, reversibility)
+* Evidence formats:
+  - Evidence Envelope (scan output)
+  - Plan format (approved steps)
+  - Run bundle layout (folders + naming)
+  - Receipt format (human-readable + machine-readable)
+* Pack system spec:
+  - pack manifest
+  - capability detection
+  - just-in-time install prompts (later if packs are separate repos)
+* Ecosystem seam files (as needed): `STATE.scm` / `META.scm` / `ECOSYSTEM.scm`
+
+== Phase 2: Core MVP (Scan→Plan→Apply→Undo→Receipt)
+
+Deliverables:
+
+* Core CLI:
+  - `detect`, `scan`, `plan`, `apply`, `undo`, `receipt`, `export`
+* Plan engine:
+  - produces a plan with preview + reversibility labels
+  - refuses to apply without explicit approval
+* Apply runner:
+  - executes step-by-step with robust logging
+  - captures exit codes + evidence artifacts
+* Undo system:
+  - undo tokens generated during apply
+  - clear labeling: reversible / partial / not reversible
+* Receipt generator:
+  - “what checked”, “what changed”, “what not changed (and why)”
+  - includes evidence pointers and undo instructions
+* One “Typical” safe pack implemented end-to-end (pick one OS first)
+
+== Phase 3: Packs, adapters, integrations, packaging
+
+Deliverables:
+
+* Safe packs (Typical):
+  - Windows-safe, Linux-safe, macOS-safe (order by priority)
+* Technician pack (Expert-gated):
+  - Windows-tech (DISM/SFC workflows etc.) with strict warnings + receipts
+* Adapters:
+  - user-supplied external tool integration where useful (no bundling)
+* Integrations:
+  - AmbientOps “Ward” deep-links into plans
+  - PSA handoff for “Crisis Mode”
+  - JuliaDashboard timeline ingest of run bundles
+  - feedback-a-tron message intents + redaction presets
+  - HAR policy-gated execution hooks (optional)
+* Packaging:
+  - installers and/or portable builds per OS
+  - (optional) Guix/Nix definitions as secondary distribution paths
+
+== Phase 4: Release & distribution
+
+Deliverables:
+
+* v0.1.0 release: MVP + one safe pack + receipts/undo
+* Release automation (changelog, signed artifacts/hashes)
+* User docs (calm, non-fearware tone)
+* Contribution guide for packs/themes/adapters
+
+== Technology decision (resolved for now)
+
+*Primary:* **D** (core implementation)
+*Targeted components:* **Rust** (privileged/safety-critical helpers), when needed.
+
+This keeps development fast while reserving Rust for the most sensitive execution paths.
+
+== Contributing
+
+Contributions are welcome once Phase 1 specifications land.
+
+All contributions must:
+
+* follow repository policy in `.claude/CLAUDE.md`
+* avoid fearware claims and dark patterns
+* keep scan non-mutating; apply explicit; undo + receipt mandatory
