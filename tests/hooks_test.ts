@@ -55,34 +55,38 @@ describe("Hook Script Content", () => {
     assertEquals(
       content.includes("SPDX") || content.includes("spdx"),
       true,
-      "Should reference SPDX in the script"
+      "Should reference SPDX in the script",
     );
   });
 
   it("validate-sha-pins.sh should check for pinned actions", async () => {
     const content = await Deno.readTextFile(`${HOOKS_DIR}validate-sha-pins.sh`);
     assertEquals(
-      content.includes("sha") || content.includes("SHA") || content.includes("@"),
+      content.includes("sha") || content.includes("SHA") ||
+        content.includes("@"),
       true,
-      "Should reference SHA pins"
+      "Should reference SHA pins",
     );
   });
 
   it("validate-permissions.sh should check workflow permissions", async () => {
-    const content = await Deno.readTextFile(`${HOOKS_DIR}validate-permissions.sh`);
+    const content = await Deno.readTextFile(
+      `${HOOKS_DIR}validate-permissions.sh`,
+    );
     assertEquals(
       content.includes("permissions") || content.includes("read-all"),
       true,
-      "Should reference permissions"
+      "Should reference permissions",
     );
   });
 
   it("validate-codeql.sh should check CodeQL configuration", async () => {
     const content = await Deno.readTextFile(`${HOOKS_DIR}validate-codeql.sh`);
     assertEquals(
-      content.includes("codeql") || content.includes("CodeQL") || content.includes("language"),
+      content.includes("codeql") || content.includes("CodeQL") ||
+        content.includes("language"),
       true,
-      "Should reference CodeQL"
+      "Should reference CodeQL",
     );
   });
 });

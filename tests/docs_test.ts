@@ -40,16 +40,17 @@ describe("Documentation Content", () => {
     assertEquals(
       content.includes("fear") || content.includes("Fear"),
       true,
-      "Should mention fearware concept"
+      "Should mention fearware concept",
     );
   });
 
   it("CLAIMS_POLICY.adoc should define evidence requirements", async () => {
     const content = await Deno.readTextFile(`${DOCS_DIR}CLAIMS_POLICY.adoc`);
     assertEquals(
-      content.includes("evidence") || content.includes("claim") || content.includes("Claim"),
+      content.includes("evidence") || content.includes("claim") ||
+        content.includes("Claim"),
       true,
-      "Should mention claims and evidence"
+      "Should mention claims and evidence",
     );
   });
 
@@ -67,7 +68,7 @@ describe("Documentation Content", () => {
       assertEquals(
         content.includes("= ") || content.includes("== "),
         true,
-        `${file} should have AsciiDoc headers`
+        `${file} should have AsciiDoc headers`,
       );
     }
   });
