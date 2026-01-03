@@ -5,7 +5,7 @@
 
 import { assertEquals, assertExists } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import { HOOKS, isValidHook } from "../mod.ts";
+import { HOOKS, isValidHook } from "../mod.js";
 
 const HOOKS_DIR = new URL("../hooks/", import.meta.url).pathname;
 

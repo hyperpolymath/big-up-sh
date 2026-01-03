@@ -18,9 +18,7 @@ export const HOOKS = [
   "validate-permissions.sh",
   "validate-sha-pins.sh",
   "validate-spdx.sh",
-] as const;
-
-export type HookName = typeof HOOKS[number];
+];
 
 /**
  * Required documentation files for a complete pack
@@ -28,15 +26,14 @@ export type HookName = typeof HOOKS[number];
 export const REQUIRED_DOCS = [
   "ANTI-FEARWARE.adoc",
   "CLAIMS_POLICY.adoc",
-] as const;
+];
 
 /**
  * Validate that a pack directory has required files
+ * @param {string[]} files - List of files in the pack directory
+ * @returns {{valid: boolean, missing: string[]}} Validation result
  */
-export function validatePackStructure(files: string[]): {
-  valid: boolean;
-  missing: string[];
-} {
+export function validatePackStructure(files) {
   const missing = REQUIRED_DOCS.filter((doc) => !files.includes(doc));
   return {
     valid: missing.length === 0,
@@ -46,9 +43,11 @@ export function validatePackStructure(files: string[]): {
 
 /**
  * Check if a hook exists in the hooks directory
+ * @param {string} name - Hook name to validate
+ * @returns {boolean} True if valid hook name
  */
-export function isValidHook(name: string): name is HookName {
-  return HOOKS.includes(name as HookName);
+export function isValidHook(name) {
+  return HOOKS.includes(name);
 }
 
 // =============================================================================
@@ -63,13 +62,14 @@ export function isValidHook(name: string): name is HookName {
  * - Procedure execution chains
  */
 
-let globalCorrelationId: string | null = null;
+let globalCorrelationId = null;
 
 /**
  * Generate a new correlation ID
  * Format: corr-{timestamp_hex}{random_hex} (16 hex chars total)
+ * @returns {string} New correlation ID
  */
-export function generateCorrelationId(): string {
+export function generateCorrelationId() {
   const timestamp = Date.now().toString(16).slice(-8).padStart(8, "0");
   const random = Math.random().toString(16).slice(2, 10).padStart(8, "0");
   return `corr-${timestamp}${random}`;
@@ -78,8 +78,10 @@ export function generateCorrelationId(): string {
 /**
  * Initialize the global correlation ID
  * Uses provided ID or generates a new one
+ * @param {string} [provided] - Optional correlation ID to use
+ * @returns {string} The initialized correlation ID
  */
-export function initCorrelationId(provided?: string): string {
+export function initCorrelationId(provided) {
   if (globalCorrelationId === null) {
     globalCorrelationId = provided ?? generateCorrelationId();
   }
@@ -88,22 +90,25 @@ export function initCorrelationId(provided?: string): string {
 
 /**
  * Get the current global correlation ID
+ * @returns {string|null} Current correlation ID or null
  */
-export function getCorrelationId(): string | null {
+export function getCorrelationId() {
   return globalCorrelationId;
 }
 
 /**
  * Reset the global correlation ID (mainly for testing)
  */
-export function resetCorrelationId(): void {
+export function resetCorrelationId() {
   globalCorrelationId = null;
 }
 
 /**
  * Validate a correlation ID format
+ * @param {string} id - ID to validate
+ * @returns {boolean} True if valid format
  */
-export function isValidCorrelationId(id: string): boolean {
+export function isValidCorrelationId(id) {
   return /^corr-[a-f0-9]{16}$/.test(id);
 }
 
@@ -112,22 +117,16 @@ export function isValidCorrelationId(id: string): boolean {
 // =============================================================================
 
 /**
- * Context for a theatre procedure execution
- */
-export interface ProcedureContext {
-  correlationId: string;
-  procedureId: string;
-  startedAt: Date;
-  source?: "emergency-room" | "psa" | "manual" | "scheduled";
-  dryRun: boolean;
-}
-
-/**
  * Create a new procedure context
+ * @param {Object} options - Context options
+ * @param {string} options.procedureId - Required procedure ID
+ * @param {string} [options.correlationId] - Optional correlation ID
+ * @param {Date} [options.startedAt] - Optional start time
+ * @param {string} [options.source] - Source: "emergency-room" | "psa" | "manual" | "scheduled"
+ * @param {boolean} [options.dryRun] - Whether this is a dry run
+ * @returns {{correlationId: string, procedureId: string, startedAt: Date, source: string, dryRun: boolean}} Procedure context
  */
-export function createProcedureContext(
-  options: Partial<ProcedureContext> & { procedureId: string },
-): ProcedureContext {
+export function createProcedureContext(options) {
   return {
     correlationId: options.correlationId ?? initCorrelationId(),
     procedureId: options.procedureId,

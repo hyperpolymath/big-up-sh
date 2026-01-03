@@ -12,7 +12,7 @@ import {
   initCorrelationId,
   isValidCorrelationId,
   resetCorrelationId,
-} from "../mod.ts";
+} from "../mod.js";
 
 describe("Correlation ID", () => {
   afterEach(() => {
@@ -25,7 +25,7 @@ describe("Correlation ID", () => {
   });
 
   it("should generate unique correlation IDs", () => {
-    const ids = new Set<string>();
+    const ids = new Set();
     for (let i = 0; i < 100; i++) {
       ids.add(generateCorrelationId());
     }

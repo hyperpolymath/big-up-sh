@@ -5,7 +5,7 @@
 
 import { assertEquals, assertExists } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
-import { REQUIRED_DOCS, validatePackStructure } from "../mod.ts";
+import { REQUIRED_DOCS, validatePackStructure } from "../mod.js";
 
 const DOCS_DIR = new URL("../docs/", import.meta.url).pathname;
 
