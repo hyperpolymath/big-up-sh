@@ -13,12 +13,14 @@ import std.file;
 
 import core.types;
 import core.engine : applyPlan, executeUndo, generateReceipt, saveReceipt,
-                      saveUndoTokens, printPlanPreview, RUN_BUNDLE_DIR;
+                      saveUndoTokens, printPlanPreview, getHomeDir, runBundleDir;
 import core.security;
+import std.path;
 import core.ecosystem;
 import packs.system;
 import packs.cleanup;
 import packs.repos;
+import packs.diagnostics;
 import std.conv : to;
 
 /// Version info
@@ -118,6 +120,7 @@ void printUsage()
     writeln("  system             System optimization (firewall, journal, network)");
     writeln("  cleanup            Clean caches and temporary files");
     writeln("  repos              Repository synchronization");
+    writeln("  diagnostics|diag   System health diagnostics (OS, memory, disks, services)");
     writeln("");
     writeln("QUICK COMMANDS:");
     writeln("  quick <pack>       Scan + plan + preview (no apply without --yes)");
@@ -174,6 +177,10 @@ void cmdScan(string[] args)
         case "repos":
             envelope = scanRepos();
             break;
+        case "diagnostics":
+        case "diag":
+            envelope = scanDiagnostics();
+            break;
         default:
             stderr.writefln("Unknown pack: %s", pack);
             return;
@@ -221,6 +228,10 @@ void cmdPlan(string[] args)
             break;
         case "repos":
             plan = planRepoSync(envelope);
+            break;
+        case "diagnostics":
+        case "diag":
+            plan = planDiagnostics(envelope);
             break;
         default:
             stderr.writefln("Unknown pack: %s", pack);
@@ -370,7 +381,7 @@ void cmdReceipt(string[] args)
     writeln("=== Execution Receipts ===");
     writeln("");
 
-    string runDir = RUN_BUNDLE_DIR;
+    string runDir = runBundleDir();
     if (!exists(runDir))
     {
         writeln("No receipts found.");
@@ -439,6 +450,10 @@ void cmdQuick(string[] args)
         case "repos":
             envelope = scanRepos();
             break;
+        case "diagnostics":
+        case "diag":
+            envelope = scanDiagnostics();
+            break;
         default:
             stderr.writefln("Unknown pack: %s", pack);
             return;
@@ -456,6 +471,10 @@ void cmdQuick(string[] args)
             break;
         case "repos":
             plan = planRepoSync(envelope);
+            break;
+        case "diagnostics":
+        case "diag":
+            plan = planDiagnostics(envelope);
             break;
         default:
             return;
@@ -497,14 +516,23 @@ void cmdStatus(string[] args)
 // Persistence helpers
 // ============================================================================
 
-enum CACHE_DIR = "/var/home/hyper/.cache/sor";
+/// Get cache directory from XDG or fallback
+string cacheDir()
+{
+    import std.process : environment;
+    auto xdgCache = environment.get("XDG_CACHE_HOME", "");
+    if (xdgCache.length > 0)
+        return buildPath(xdgCache, "sor");
+    return buildPath(getHomeDir(), ".cache", "sor");
+}
 
 void saveScanEnvelope(ScanEnvelope envelope)
 {
-    if (!exists(CACHE_DIR))
-        mkdirRecurse(CACHE_DIR);
+    auto cache = cacheDir();
+    if (!exists(cache))
+        mkdirRecurse(cache);
 
-    string filename = CACHE_DIR ~ "/scan-" ~ envelope.scanType ~ ".json";
+    string filename = buildPath(cache, "scan-" ~ envelope.scanType ~ ".json");
 
     import std.json : JSONValue;
     JSONValue json;
@@ -539,7 +567,7 @@ void saveScanEnvelope(ScanEnvelope envelope)
 ScanEnvelope loadScanEnvelope(string scanType)
 {
     ScanEnvelope envelope;
-    string filename = CACHE_DIR ~ "/scan-" ~ scanType ~ ".json";
+    string filename = buildPath(cacheDir(), "scan-" ~ scanType ~ ".json");
 
     if (!exists(filename))
         return envelope;
@@ -593,10 +621,11 @@ ScanEnvelope loadScanEnvelope(string scanType)
 
 void savePlan(Plan plan)
 {
-    if (!exists(CACHE_DIR))
-        mkdirRecurse(CACHE_DIR);
+    auto cache = cacheDir();
+    if (!exists(cache))
+        mkdirRecurse(cache);
 
-    string filename = CACHE_DIR ~ "/current-plan.json";
+    string filename = buildPath(cache, "current-plan.json");
 
     import std.json : JSONValue;
     JSONValue json;
@@ -628,7 +657,7 @@ void savePlan(Plan plan)
 Plan loadPlan()
 {
     Plan plan;
-    string filename = CACHE_DIR ~ "/current-plan.json";
+    string filename = buildPath(cacheDir(), "current-plan.json");
 
     if (!exists(filename))
         return plan;
@@ -677,7 +706,7 @@ Plan loadPlan()
 UndoToken[] loadUndoTokens()
 {
     UndoToken[] tokens;
-    string runDir = RUN_BUNDLE_DIR;
+    string runDir = runBundleDir();
 
     if (!exists(runDir))
         return tokens;

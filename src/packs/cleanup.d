@@ -13,9 +13,13 @@ import std.path;
 import std.string;
 import std.format;
 import std.algorithm;
+import core.engine : getHomeDir;
 
-/// Home directory (configurable)
-enum HOME_DIR = "/var/home/hyper";
+/// Get home directory at runtime
+string homeDir()
+{
+    return getHomeDir();
+}
 
 /// Cleanup target definition
 struct CleanupTarget
@@ -29,17 +33,18 @@ struct CleanupTarget
 /// Get list of cleanup targets
 CleanupTarget[] getCleanupTargets()
 {
+    string home = homeDir();
     return [
-        CleanupTarget("debuginfod cache", HOME_DIR ~ "/.cache/debuginfod_client", Priority.high, true),
-        CleanupTarget("npm cache", HOME_DIR ~ "/.npm", Priority.medium, true),
-        CleanupTarget("bun cache", HOME_DIR ~ "/.bun", Priority.medium, true),
-        CleanupTarget("pip cache", HOME_DIR ~ "/.cache/pip", Priority.medium, true),
-        CleanupTarget("cargo cache", HOME_DIR ~ "/.cargo/registry/cache", Priority.medium, true),
-        CleanupTarget("go mod cache", HOME_DIR ~ "/go/pkg/mod/cache", Priority.medium, true),
-        CleanupTarget("thumbnails", HOME_DIR ~ "/.cache/thumbnails", Priority.low, true),
-        CleanupTarget("Edge Dev cache", HOME_DIR ~ "/.var/app/com.microsoft.EdgeDev/cache", Priority.medium, true),
-        CleanupTarget("partial downloads", HOME_DIR ~ "/Downloads/*.part", Priority.low, false),
-        CleanupTarget("vim undo", HOME_DIR ~ "/.local/state/nvim/undo", Priority.low, true),
+        CleanupTarget("debuginfod cache", buildPath(home, ".cache/debuginfod_client"), Priority.high, true),
+        CleanupTarget("npm cache", buildPath(home, ".npm"), Priority.medium, true),
+        CleanupTarget("bun cache", buildPath(home, ".bun"), Priority.medium, true),
+        CleanupTarget("pip cache", buildPath(home, ".cache/pip"), Priority.medium, true),
+        CleanupTarget("cargo cache", buildPath(home, ".cargo/registry/cache"), Priority.medium, true),
+        CleanupTarget("go mod cache", buildPath(home, "go/pkg/mod/cache"), Priority.medium, true),
+        CleanupTarget("thumbnails", buildPath(home, ".cache/thumbnails"), Priority.low, true),
+        CleanupTarget("Edge Dev cache", buildPath(home, ".var/app/com.microsoft.EdgeDev/cache"), Priority.medium, true),
+        CleanupTarget("partial downloads", buildPath(home, "Downloads") ~ "/*.part", Priority.low, false),
+        CleanupTarget("vim undo", buildPath(home, ".local/state/nvim/undo"), Priority.low, true),
     ];
 }
 

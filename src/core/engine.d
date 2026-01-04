@@ -15,14 +15,41 @@ import std.process;
 import std.string;
 import std.array;
 
+/// Get home directory from environment
+string getHomeDir()
+{
+    import std.process : environment;
+    auto home = environment.get("HOME", "");
+    if (home.length == 0)
+    {
+        // Fallback for different platforms
+        home = environment.get("USERPROFILE", "/tmp");
+    }
+    return home;
+}
+
+/// Get XDG data directory
+string getDataDir()
+{
+    import std.process : environment;
+    auto xdgData = environment.get("XDG_DATA_HOME", "");
+    if (xdgData.length > 0)
+        return xdgData;
+    return buildPath(getHomeDir(), ".local", "share");
+}
+
 /// Run bundle directory for storing receipts and undo tokens
-enum RUN_BUNDLE_DIR = "/var/home/hyper/.local/share/sor/runs";
+string runBundleDir()
+{
+    return buildPath(getDataDir(), "sor", "runs");
+}
 
 /// Initialize the run bundle directory
 void initRunBundle()
 {
-    if (!exists(RUN_BUNDLE_DIR))
-        mkdirRecurse(RUN_BUNDLE_DIR);
+    auto bundleDir = runBundleDir();
+    if (!exists(bundleDir))
+        mkdirRecurse(bundleDir);
 }
 
 /// Execute a plan step and generate undo token if reversible
@@ -170,7 +197,7 @@ void saveReceipt(Receipt receipt)
     initRunBundle();
 
     string filename = format("%s/receipt-%s.json",
-        RUN_BUNDLE_DIR,
+        runBundleDir(),
         receipt.timestamp.toISOExtString().replace(":", "-"));
 
     JSONValue json;
@@ -198,7 +225,7 @@ void saveUndoTokens(UndoToken[] tokens, string planId)
     initRunBundle();
 
     string filename = format("%s/undo-%s.json",
-        RUN_BUNDLE_DIR,
+        runBundleDir(),
         planId[0 .. 8]);
 
     JSONValue[] tokenArray;

@@ -24,11 +24,14 @@ import std.conv : to;
 /// Run bundle format version
 enum RUN_BUNDLE_VERSION = "1.0.0";
 
-/// Default paths for ecosystem integration
-enum OBSERVATORY_INBOX = "/var/home/hyper/.local/share/ambientops/observatory/inbox";
+// Import path utilities from engine
+import core.engine : getHomeDir, getDataDir, runBundleDir;
 
-// Import RUN_BUNDLE_DIR from engine
-import core.engine : RUN_BUNDLE_DIR;
+/// Get Observatory inbox directory
+string observatoryInbox()
+{
+    return buildPath(getDataDir(), "ambientops", "observatory", "inbox");
+}
 
 /// Run bundle - complete record of a plan execution
 struct RunBundle
@@ -143,13 +146,14 @@ JSONValue bundleToJson(RunBundle bundle)
 /// Save run bundle to local storage
 string saveRunBundle(RunBundle bundle)
 {
+    auto bundleDir = runBundleDir();
     // Ensure directories exist with secure permissions
-    if (!exists(RUN_BUNDLE_DIR))
-        mkdirRecurse(RUN_BUNDLE_DIR);
-    secureRunBundle(RUN_BUNDLE_DIR);
+    if (!exists(bundleDir))
+        mkdirRecurse(bundleDir);
+    secureRunBundle(bundleDir);
 
     string filename = format("%s/bundle-%s.json",
-        RUN_BUNDLE_DIR,
+        bundleDir,
         bundle.timestamp.toISOExtString().replace(":", "-"));
 
     auto json = bundleToJson(bundle);
@@ -163,14 +167,15 @@ string saveRunBundle(RunBundle bundle)
 /// Export run bundle to Observatory inbox (if available)
 bool exportToObservatory(RunBundle bundle)
 {
-    if (!exists(OBSERVATORY_INBOX))
+    auto inbox = observatoryInbox();
+    if (!exists(inbox))
     {
         writeln("Observatory inbox not found - bundle saved locally only");
         return false;
     }
 
     string filename = format("%s/bundle-%s-%s.json",
-        OBSERVATORY_INBOX,
+        inbox,
         bundle.hostname,
         bundle.timestamp.toISOExtString().replace(":", "-"));
 
@@ -215,7 +220,7 @@ EcosystemStatus checkEcosystem()
     EcosystemStatus status;
 
     // Check Observatory
-    status.observatoryAvailable = exists(OBSERVATORY_INBOX);
+    status.observatoryAvailable = exists(observatoryInbox());
     if (status.observatoryAvailable)
         status.messages ~= "Observatory: connected";
     else

@@ -13,9 +13,17 @@ import std.path;
 import std.string;
 import std.algorithm;
 import std.array;
+import core.engine : getHomeDir;
 
-/// Repos directory
-enum REPOS_DIR = "/var/home/hyper/repos";
+/// Get repos directory - defaults to ~/repos or uses SOR_REPOS_DIR env var
+string reposDir()
+{
+    import std.process : environment;
+    auto customDir = environment.get("SOR_REPOS_DIR", "");
+    if (customDir.length > 0)
+        return customDir;
+    return buildPath(getHomeDir(), "repos");
+}
 
 /// Repository status
 struct RepoStatus
@@ -33,11 +41,12 @@ struct RepoStatus
 string[] getRepos()
 {
     string[] repos;
+    auto rdir = reposDir();
 
-    if (!exists(REPOS_DIR))
+    if (!exists(rdir))
         return repos;
 
-    foreach (entry; dirEntries(REPOS_DIR, SpanMode.shallow))
+    foreach (entry; dirEntries(rdir, SpanMode.shallow))
     {
         if (entry.isDir)
         {
@@ -102,7 +111,7 @@ ScanEnvelope scanRepos()
     writeln("");
 
     auto repos = getRepos();
-    writefln("Found %d repositories in %s", repos.length, REPOS_DIR);
+    writefln("Found %d repositories in %s", repos.length, reposDir());
     writeln("");
 
     int withChanges = 0;
